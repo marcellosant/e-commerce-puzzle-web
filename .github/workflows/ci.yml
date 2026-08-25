@@ -17,7 +17,11 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      # npm install instead of npm ci: the lockfile, generated on Windows,
+      # only carries a full entry for the Windows lightningcss (Tailwind's
+      # CSS engine) binary. npm install re-resolves the Linux optional
+      # binary for this runner instead of erroring on the missing entry.
+      - run: npm install
       - run: npm run lint
       - run: npm test
       - run: npm run build
