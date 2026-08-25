@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-surface-muted: #f2f2f2;
+  --color-surface-header: #f9f9f9;
+  --color-text-secondary: #5d5f5f;
+
+  /* Fonts */
+  --font-sans: var(--font-archivo-narrow), sans-serif;
+  --font-serif: var(--font-source-serif), serif;
+
+  /* Type scale — smaller text gets proportionally wider tracking */
+  --text-nav: 12px;
+  --text-nav--line-height: 16px;
+  --text-nav--letter-spacing: 2.4px;
+  --text-nav--font-weight: 600;
+
+  --text-button: 14px;
+  --text-button--line-height: 20px;
+  --text-button--letter-spacing: 1.8px;
+  --text-button--font-weight: 700;
+
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-body--letter-spacing: 0px;
+
+  --text-subtitle: 24px;
+  --text-subtitle--line-height: 30px;
+  --text-subtitle--letter-spacing: 0.96px;
+  --text-subtitle--font-weight: 700;
+
+  --text-h1: 34px;
+  --text-h1--line-height: 38px;
+  --text-h1--letter-spacing: 0.48px;
+  --text-h1--font-weight: 700;
+
+  /* Square borders by default; explicit exceptions used per-component */
+  --radius-none: 0px;
+  --radius-product: 4px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-black);
+  }
+
+  body {
+    @apply bg-white text-black antialiased;
+  }
+}
