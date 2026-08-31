@@ -12,11 +12,28 @@ describe("resolveOrderItems", () => {
 
     expect(resolved).toHaveLength(1);
     expect(resolved[0]).toMatchObject({
+      productId: product.id,
+      variantId: variant.id,
+      slug: product.slug,
       name: product.name,
+      image: product.images[0],
       variantName: variant.name,
+      unitPrice: product.price,
       quantity: 2,
       lineTotal: product.price * 2,
     });
+  });
+
+  it("keeps ids and slug so the cart can link to and mutate the line", () => {
+    const product = PRODUCTS[1];
+    const variant = product.variants[0];
+    const [resolved] = resolveOrderItems([
+      { productId: product.id, variantId: variant.id, quantity: 1 },
+    ]);
+
+    expect(resolved.key).toBe(`${product.id}-${variant.id}`);
+    expect(resolved.slug).toBe(product.slug);
+    expect(resolved.lineTotal).toBe(resolved.unitPrice);
   });
 
   it("silently drops items referencing a product that no longer exists", () => {

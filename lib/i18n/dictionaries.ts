@@ -30,6 +30,20 @@ export interface Dictionary {
     placeholder: string;
     label: string;
   };
+  cart: {
+    title: string;
+    empty: string;
+    emptyCta: string;
+    itemCount: (count: number) => string;
+    quantity: string;
+    increase: string;
+    decrease: string;
+    remove: (name: string) => string;
+    subtotal: string;
+    shippingNote: string;
+    proceedToCheckout: string;
+    continueShopping: string;
+  };
   product: {
     color: string;
     specifications: string;
@@ -138,6 +152,20 @@ const en: Dictionary = {
   search: {
     placeholder: "Search frames...",
     label: "Search",
+  },
+  cart: {
+    title: "Your Bag",
+    empty: "Your bag is empty.",
+    emptyCta: "Browse the Collection",
+    itemCount: (count) => `${count} ${count === 1 ? "item" : "items"}`,
+    quantity: "Quantity",
+    increase: "Increase quantity",
+    decrease: "Decrease quantity",
+    remove: (name) => `Remove ${name} from bag`,
+    subtotal: "Subtotal",
+    shippingNote: "Shipping calculated at checkout.",
+    proceedToCheckout: "Proceed to Checkout",
+    continueShopping: "Continue Shopping",
   },
   product: {
     color: "Color",
@@ -248,6 +276,20 @@ const pt: Dictionary = {
   search: {
     placeholder: "Buscar armações...",
     label: "Buscar",
+  },
+  cart: {
+    title: "Sua Sacola",
+    empty: "Sua sacola está vazia.",
+    emptyCta: "Ver a Coleção",
+    itemCount: (count) => `${count} ${count === 1 ? "item" : "itens"}`,
+    quantity: "Quantidade",
+    increase: "Aumentar quantidade",
+    decrease: "Diminuir quantidade",
+    remove: (name) => `Remover ${name} da sacola`,
+    subtotal: "Subtotal",
+    shippingNote: "Frete calculado na finalização.",
+    proceedToCheckout: "Finalizar Compra",
+    continueShopping: "Continuar Comprando",
   },
   product: {
     color: "Cor",

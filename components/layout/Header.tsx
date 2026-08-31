@@ -28,7 +28,7 @@ function CartBagIcon() {
   const { itemCount } = useCart();
   const { t } = useLocale();
   return (
-    <Link href="/checkout" className="relative" aria-label={t.nav.cart}>
+    <Link href="/cart" className="relative" aria-label={t.nav.cart}>
       <ShoppingBag size={20} />
       {itemCount > 0 && (
         <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-black text-white text-[10px] font-sans">
