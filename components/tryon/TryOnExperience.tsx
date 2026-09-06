@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { Button } from "@/components/ui/Button";
 import { useCamera } from "@/components/tryon/useCamera";
+import { useFaceLandmarker } from "@/components/tryon/useFaceLandmarker";
 import { TryOnScene } from "@/components/tryon/TryOnScene";
 
 interface TryOnExperienceProps {
@@ -16,11 +17,18 @@ interface TryOnExperienceProps {
 export function TryOnExperience({ productName, slug }: TryOnExperienceProps) {
   const { t } = useLocale();
   const { videoRef, status, start } = useCamera();
+  const { landmarkerRef, status: modelStatus, load } = useFaceLandmarker();
   const productHref = `/product/${slug}`;
 
   useEffect(() => {
     start();
   }, [start]);
+
+  // Only fetch the tracking model once there is a camera feed to run it on —
+  // no point paying for a few megabytes if permission is going to be refused.
+  useEffect(() => {
+    if (status === "ready") load();
+  }, [status, load]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
@@ -33,7 +41,7 @@ export function TryOnExperience({ productName, slug }: TryOnExperienceProps) {
         className="h-full w-full object-cover scale-x-[-1]"
       />
 
-      <TryOnScene />
+      <TryOnScene videoRef={videoRef} landmarkerRef={landmarkerRef} />
 
       <div className="absolute top-0 inset-x-0 flex items-center justify-between p-4">
         <p className="font-sans uppercase text-nav text-white drop-shadow">
@@ -47,6 +55,28 @@ export function TryOnExperience({ productName, slug }: TryOnExperienceProps) {
           <X size={24} />
         </Link>
       </div>
+
+      {/* The model keeps loading behind a live preview rather than blocking it,
+          so the wearer can frame themselves while it downloads. */}
+      {status === "ready" && modelStatus === "loading" && (
+        <p className="absolute inset-x-0 top-16 text-center font-serif text-body text-white drop-shadow">
+          {t.tryOn.loadingModel}
+        </p>
+      )}
+
+      {status === "ready" && modelStatus === "error" && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 px-6">
+          <div className="max-w-sm text-center text-white">
+            <h2 className="font-sans uppercase text-subtitle mb-3">
+              {t.tryOn.modelErrorTitle}
+            </h2>
+            <p className="font-serif text-body mb-6">{t.tryOn.modelErrorBody}</p>
+            <Button variant="secondary" size="md" onClick={load}>
+              {t.tryOn.retry}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {status !== "ready" && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 px-6">

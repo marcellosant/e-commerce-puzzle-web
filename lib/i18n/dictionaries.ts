@@ -119,6 +119,9 @@ export interface Dictionary {
     privacy: string;
     pageTitle: (product: string) => string;
     starting: string;
+    loadingModel: string;
+    modelErrorTitle: string;
+    modelErrorBody: string;
     permissionTitle: string;
     permissionBody: string;
     unsupportedTitle: string;
@@ -254,9 +257,13 @@ const en: Dictionary = {
     button: "Virtual Try-On",
     scanTitle: "Try it on",
     scanHint: "Scan with your phone to see this frame on your face.",
-    privacy: "Runs entirely on your device. Your camera image is never uploaded.",
+    privacy: "Face detection runs on your device. Your camera image is never uploaded.",
     pageTitle: (product) => `Trying on ${product}`,
     starting: "Starting camera...",
+    loadingModel: "Loading face tracking...",
+    modelErrorTitle: "Couldn't start face tracking",
+    modelErrorBody:
+      "The face tracking model failed to load. Check your connection and try again.",
     permissionTitle: "Camera access needed",
     permissionBody:
       "Allow camera access to try this frame on. Nothing is recorded or sent anywhere.",
@@ -395,9 +402,13 @@ const pt: Dictionary = {
     scanTitle: "Experimente",
     scanHint: "Escaneie com seu celular para ver esta armação no seu rosto.",
     privacy:
-      "Roda inteiramente no seu aparelho. A imagem da câmera nunca é enviada.",
+      "A detecção acontece no seu aparelho. A imagem da câmera nunca é enviada.",
     pageTitle: (product) => `Provando ${product}`,
     starting: "Iniciando câmera...",
+    loadingModel: "Carregando rastreamento facial...",
+    modelErrorTitle: "Não foi possível iniciar o rastreamento",
+    modelErrorBody:
+      "O modelo de rastreamento facial não carregou. Verifique sua conexão e tente de novo.",
     permissionTitle: "Precisamos da câmera",
     permissionBody:
       "Permita o acesso à câmera para provar esta armação. Nada é gravado ou enviado.",
