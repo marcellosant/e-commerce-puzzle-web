@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
 import { Button } from "@/components/ui/Button";
 import { useCamera } from "@/components/tryon/useCamera";
+import { TryOnScene } from "@/components/tryon/TryOnScene";
 
 interface TryOnExperienceProps {
   productName: string;
@@ -31,6 +32,8 @@ export function TryOnExperience({ productName, slug }: TryOnExperienceProps) {
         // image move left. The 3D overlay will be mirrored to match.
         className="h-full w-full object-cover scale-x-[-1]"
       />
+
+      <TryOnScene />
 
       <div className="absolute top-0 inset-x-0 flex items-center justify-between p-4">
         <p className="font-sans uppercase text-nav text-white drop-shadow">
