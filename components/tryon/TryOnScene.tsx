@@ -38,6 +38,18 @@ const ROTATION_RESPONSIVENESS = 18;
 const CAMERA_FOV_DEGREES = 45;
 const CAMERA_DISTANCE = 1;
 
+/**
+ * Head turn, in radians, past which the arm on the far side is hidden.
+ *
+ * Nothing here occludes: there is no depth-writing head for the frame to go
+ * behind, so on a turn the far temple drew straight across the cheek and
+ * forehead. Hiding it approximates what the head would have covered anyway,
+ * and removes the single most obviously wrong thing in a profile view. A real
+ * occluder mesh built from the face landmarks would replace this and would
+ * also fix the far lens.
+ */
+const FAR_TEMPLE_HIDE_YAW = 0.32;
+
 interface TryOnSceneProps {
   videoRef: RefObject<HTMLVideoElement | null>;
   landmarkerRef: RefObject<FaceLandmarker | null>;
@@ -80,6 +92,11 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
     frame.visible = false;
     scene.add(frame);
 
+    const temples: THREE.Object3D[] = [];
+    frame.traverse((object) => {
+      if (object.userData.side !== undefined) temples.push(object);
+    });
+
     // The model is built in metres; placement is in pixels. Measuring the mesh
     // once gives the conversion, and keeps it correct if the geometry changes.
     const modelWidth = new THREE.Box3().setFromObject(frame).getSize(
@@ -114,6 +131,40 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
     const smoothed = { x: 0, y: 0, scale: 0, roll: 0, initialised: false };
     const targetQuaternion = new THREE.Quaternion();
     const poseMatrix = new THREE.Matrix4();
+
+    const euler = new THREE.Euler();
+    const templeWorld = new THREE.Vector3();
+
+    /**
+     * Hides whichever arm has swung behind the head.
+     *
+     * Which side that is depends on the turn direction and on the mirroring,
+     * so rather than reason about signs it just compares the arms' depths and
+     * hides the one further from the camera. That stays correct whatever the
+     * conventions turn out to be.
+     */
+    function updateTempleVisibility() {
+      // YXZ puts yaw first, so .y reads as head turn independent of tilt.
+      euler.setFromQuaternion(frame.quaternion, "YXZ");
+      const turned = Math.abs(euler.y) > FAR_TEMPLE_HIDE_YAW;
+
+      if (!turned) {
+        for (const temple of temples) temple.visible = true;
+        return;
+      }
+
+      frame.updateMatrixWorld(true);
+      let furthest: THREE.Object3D | null = null;
+      let furthestZ = Infinity;
+      for (const temple of temples) {
+        temple.getWorldPosition(templeWorld);
+        if (templeWorld.z < furthestZ) {
+          furthestZ = templeWorld.z;
+          furthest = temple;
+        }
+      }
+      for (const temple of temples) temple.visible = temple !== furthest;
+    }
 
     let raf = 0;
     let lastVideoTime = -1;
@@ -212,6 +263,7 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
         if (smoothed.initialised) {
           frame.position.set(smoothed.x, smoothed.y, 0);
           frame.scale.setScalar(smoothed.scale);
+          updateTempleVisibility();
         }
       }
 

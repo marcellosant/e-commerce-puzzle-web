@@ -11,6 +11,15 @@ export interface Point2D {
   y: number;
 }
 
+/**
+ * A landmark as the detector reports it: x and y normalised against the frame's
+ * width and height, z roughly on the same scale as x and negative toward the
+ * camera.
+ */
+export interface Landmark extends Point2D {
+  z?: number;
+}
+
 export interface Size {
   width: number;
   height: number;
@@ -82,15 +91,38 @@ export interface FrameAnchor {
 }
 
 /**
+ * Distance between two landmarks in three dimensions, expressed in the pixel
+ * scale of the camera frame.
+ *
+ * The obvious measure — how far apart the eyes look on screen — collapses as
+ * the head turns, because both eyes project toward the same place. Sizing from
+ * it made the frame shrink whenever the wearer looked away. The true 3D
+ * separation doesn't change with yaw, so it holds size steady through a turn.
+ *
+ * The axes arrive normalised differently: x and z against frame width, y
+ * against frame height. They are put back into a common scale before measuring.
+ */
+export function landmarkDistance3D(
+  a: Landmark,
+  b: Landmark,
+  video: Size
+): number {
+  const dx = (b.x - a.x) * video.width;
+  const dy = (b.y - a.y) * video.height;
+  const dz = ((b.z ?? 0) - (a.z ?? 0)) * video.width;
+  return Math.hypot(dx, dy, dz);
+}
+
+/**
  * Derives placement from three landmarks.
  *
- * Scale comes from the distance between the eye corners rather than from the
- * head-pose matrix: it stays stable as the head turns, and it self-calibrates
- * to the wearer's face and their distance from the camera without ever needing
- * to know either.
+ * Position and roll come from where the face appears on screen; size comes
+ * from the 3D span between the eye corners, which self-calibrates to the
+ * wearer's face and their distance from the camera without needing to know
+ * either, and survives the head turning away.
  */
 export function computeFrameAnchor(
-  landmarks: Point2D[],
+  landmarks: Landmark[],
   video: Size,
   display: Size,
   mirrored: boolean
@@ -104,14 +136,15 @@ export function computeFrameAnchor(
   const pb = landmarkToDisplay(b, video, display, mirrored);
   const center = landmarkToDisplay(bridge, video, display, mirrored);
 
-  const dx = pb.x - pa.x;
-  const dy = pb.y - pa.y;
-  const eyeSpan = Math.hypot(dx, dy);
+  // Measured in camera pixels, then carried through the same cover scale the
+  // video is drawn with so it lands in display pixels.
+  const { scale } = coverTransform(video, display);
+  const eyeSpan = landmarkDistance3D(a, b, video) * scale;
 
   return {
     center,
     widthPx: eyeSpan * FRAME_WIDTH_RATIO,
-    roll: Math.atan2(dy, dx),
+    roll: Math.atan2(pb.y - pa.y, pb.x - pa.x),
   };
 }
 

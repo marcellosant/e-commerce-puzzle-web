@@ -166,13 +166,16 @@ export function createMeridianFrame(): THREE.Group {
     );
     temple.position.set(
       side * (eyeOffset + LENS_HALF_W * 0.98),
-      LENS_HALF_H * 0.92,
+      LENS_HALF_H * 0.42,
       -0.058
     );
-    // Angled in toward the head, and tipped down so the far end sits where an
-    // ear would be rather than pointing straight back into space.
+    // Angled in toward the head, and dropped enough that the far end lands at
+    // ear height. Hinging near the top of a cat-eye and running level sent the
+    // arm out over the eyebrow instead, well above where an ear sits.
     temple.rotation.y = side * 0.13;
-    temple.rotation.x = -0.09;
+    temple.rotation.x = -0.2;
+    // Tagged so the renderer can hide whichever arm has gone behind the head.
+    temple.userData.side = side;
     group.add(temple);
   }
 

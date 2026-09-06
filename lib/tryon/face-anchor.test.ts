@@ -8,7 +8,7 @@ import {
   rotationFromPoseMatrix,
   smoothAngleTowards,
   smoothTowards,
-  type Point2D,
+  type Landmark,
 } from "@/lib/tryon/face-anchor";
 
 describe("coverTransform", () => {
@@ -73,8 +73,8 @@ describe("landmarkToDisplay", () => {
   });
 });
 
-function landmarksWith(overrides: Record<number, Point2D>): Point2D[] {
-  const points: Point2D[] = Array.from({ length: 468 }, () => ({ x: 0.5, y: 0.5 }));
+function landmarksWith(overrides: Record<number, Landmark>): Landmark[] {
+  const points: Landmark[] = Array.from({ length: 468 }, () => ({ x: 0.5, y: 0.5 }));
   for (const [index, value] of Object.entries(overrides)) {
     points[Number(index)] = value;
   }
@@ -124,9 +124,54 @@ describe("computeFrameAnchor", () => {
       false
     );
 
-    // Eyes four times as far apart on screen means a frame four times as wide.
+    // Eyes four times as far apart means a frame four times as wide.
     expect(near!.widthPx / far!.widthPx).toBeCloseTo(4);
     expect(near!.widthPx).toBeCloseTo(0.4 * 640 * FRAME_WIDTH_RATIO);
+  });
+
+  it("holds its size as the head turns", () => {
+    // Facing the camera: the eyes are far apart on screen and level in depth.
+    const facing = computeFrameAnchor(
+      landmarksWith({
+        [LANDMARK.eyeOuterA]: { x: 0.4, y: 0.5, z: 0 },
+        [LANDMARK.eyeOuterB]: { x: 0.6, y: 0.5, z: 0 },
+        [LANDMARK.noseBridge]: { x: 0.5, y: 0.5, z: -0.05 },
+      }),
+      video,
+      display,
+      false
+    );
+
+    // Turned 60 degrees. The eyes are still 0.2 apart in space, but only
+    // 0.2·cos60 = 0.1 of that still projects across the screen; the rest,
+    // 0.2·sin60, has gone into depth. The frame must not shrink.
+    const turn = Math.PI / 3;
+    const turned = computeFrameAnchor(
+      landmarksWith({
+        [LANDMARK.eyeOuterA]: { x: 0.45, y: 0.5, z: 0 },
+        [LANDMARK.eyeOuterB]: { x: 0.55, y: 0.5, z: -0.2 * Math.sin(turn) },
+        [LANDMARK.noseBridge]: { x: 0.5, y: 0.5, z: -0.05 },
+      }),
+      video,
+      display,
+      false
+    );
+
+    expect(facing!.widthPx).toBeCloseTo(turned!.widthPx, 1);
+  });
+
+  it("ignores depth when the detector reports none", () => {
+    const anchor = computeFrameAnchor(
+      landmarksWith({
+        [LANDMARK.eyeOuterA]: { x: 0.4, y: 0.5 },
+        [LANDMARK.eyeOuterB]: { x: 0.6, y: 0.5 },
+        [LANDMARK.noseBridge]: { x: 0.5, y: 0.5 },
+      }),
+      video,
+      display,
+      false
+    );
+    expect(anchor!.widthPx).toBeCloseTo(0.2 * 640 * FRAME_WIDTH_RATIO);
   });
 
   it("reports zero roll for level eyes and follows a tilt", () => {
