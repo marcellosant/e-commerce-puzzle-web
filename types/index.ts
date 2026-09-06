@@ -50,6 +50,12 @@ export interface Product {
   material: Material;
   specs: ProductSpecs;
   featured?: boolean;
+  /**
+   * Whether this frame can be previewed with the virtual try-on. Only set on
+   * products that have a try-on model. Currently a flag because the model is
+   * generated procedurally; becomes a path once real 3D assets exist.
+   */
+  tryOn?: boolean;
 }
 
 export interface CartItem {

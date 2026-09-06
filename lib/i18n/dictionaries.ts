@@ -112,6 +112,20 @@ export interface Dictionary {
     Bestseller: string;
     "Sold Out": string;
   };
+  tryOn: {
+    button: string;
+    scanTitle: string;
+    scanHint: string;
+    privacy: string;
+    pageTitle: (product: string) => string;
+    starting: string;
+    permissionTitle: string;
+    permissionBody: string;
+    unsupportedTitle: string;
+    unsupportedBody: string;
+    backToProduct: string;
+    retry: string;
+  };
   notFound: {
     title: string;
     message: string;
@@ -236,6 +250,22 @@ const en: Dictionary = {
     Bestseller: "Bestseller",
     "Sold Out": "Sold Out",
   },
+  tryOn: {
+    button: "Virtual Try-On",
+    scanTitle: "Try it on",
+    scanHint: "Scan with your phone to see this frame on your face.",
+    privacy: "Runs entirely on your device. Your camera image is never uploaded.",
+    pageTitle: (product) => `Trying on ${product}`,
+    starting: "Starting camera...",
+    permissionTitle: "Camera access needed",
+    permissionBody:
+      "Allow camera access to try this frame on. Nothing is recorded or sent anywhere.",
+    unsupportedTitle: "Not supported on this device",
+    unsupportedBody:
+      "This browser can't access a camera. Try opening this page on your phone.",
+    backToProduct: "Back to Product",
+    retry: "Try Again",
+  },
   notFound: {
     title: "Page Not Found",
     message: "The page you're looking for doesn't exist or has moved.",
@@ -359,6 +389,23 @@ const pt: Dictionary = {
     New: "Novo",
     Bestseller: "Mais Vendido",
     "Sold Out": "Esgotado",
+  },
+  tryOn: {
+    button: "Provar Virtualmente",
+    scanTitle: "Experimente",
+    scanHint: "Escaneie com seu celular para ver esta armação no seu rosto.",
+    privacy:
+      "Roda inteiramente no seu aparelho. A imagem da câmera nunca é enviada.",
+    pageTitle: (product) => `Provando ${product}`,
+    starting: "Iniciando câmera...",
+    permissionTitle: "Precisamos da câmera",
+    permissionBody:
+      "Permita o acesso à câmera para provar esta armação. Nada é gravado ou enviado.",
+    unsupportedTitle: "Não disponível neste aparelho",
+    unsupportedBody:
+      "Este navegador não consegue acessar a câmera. Tente abrir esta página no celular.",
+    backToProduct: "Voltar ao Produto",
+    retry: "Tentar de Novo",
   },
   notFound: {
     title: "Página Não Encontrada",

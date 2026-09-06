@@ -69,6 +69,7 @@ export const PRODUCTS: Product[] = [
       origin: "Made in Italy",
     },
     featured: true,
+    tryOn: true,
   },
   {
     id: "p2",

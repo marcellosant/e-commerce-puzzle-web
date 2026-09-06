@@ -10,6 +10,7 @@ import { Gallery } from "@/components/pdp/Gallery";
 import { VariantSelector } from "@/components/pdp/VariantSelector";
 import { SpecsList } from "@/components/pdp/SpecsList";
 import { StickyBuyBar } from "@/components/pdp/StickyBuyBar";
+import { TryOnEntry } from "@/components/tryon/TryOnEntry";
 
 export function ProductDetailView({ product }: { product: Product }) {
   const [selectedVariantId, setSelectedVariantId] = useState(
@@ -50,6 +51,8 @@ export function ProductDetailView({ product }: { product: Product }) {
             onAdd={() => addItem(product.id, selectedVariantId)}
             soldOut={product.badge === "Sold Out"}
           />
+
+          {product.tryOn && <TryOnEntry slug={product.slug} />}
 
           <SpecsList specs={localized.specs} />
         </div>
