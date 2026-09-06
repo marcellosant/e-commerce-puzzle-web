@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Heart, User } from "lucide-react";
+import { Home, LayoutGrid, Heart, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/context/LocaleContext";
 
@@ -18,7 +18,10 @@ export function BottomNavBar() {
     { href: "/", label: t.nav.home, icon: Home },
     { href: "/collection", label: t.nav.categories, icon: LayoutGrid },
     { href: "/favorites", label: t.nav.favorites, icon: Heart },
-    { href: "/profile", label: t.nav.profile, icon: User },
+    // The brief puts Profile in this slot, but account management needs a
+    // backend and is deferred to v2.0. Cart is the more useful destination
+    // meanwhile — on mobile it is otherwise only reachable from the header.
+    { href: "/cart", label: t.nav.cart, icon: ShoppingBag },
   ];
 
   return (

@@ -58,7 +58,7 @@ Then open <http://localhost:3000>.
 ## Project structure
 
 ```
-app/            Routes (App Router) — home, collection, product, cart, checkout, favourites, profile
+app/            Routes (App Router) — home, collection, product, cart, checkout, favourites
 components/     UI, grouped by feature (cart, checkout, collection, pdp, layout, ui)
 context/        React contexts — cart, favourites, locale (all persisted to localStorage)
 lib/            Pure logic — product data, filters, validation, orders, i18n dictionaries
@@ -102,4 +102,8 @@ These are deliberate, and the natural next steps for the project:
   anywhere. Wiring a real provider (e.g. Stripe) would replace this step entirely.
 - **No backend.** Products are hard-coded in `lib/data.ts`; cart, favourites, and locale live
   in `localStorage`. Orders are not persisted — the confirmation screen holds the only copy.
-- **Profile is a stub.** Account management is not implemented.
+- **No accounts.** There is no profile or order history. The design brief places
+  Profile in the mobile bottom navigation; since account management needs a backend,
+  v1.0 gives that slot to the cart instead and defers Profile to v2.0.
+- **Stock is static.** One product is flagged `Sold Out` to exercise the state, but
+  there is no inventory — an item already in a cart stays purchasable.

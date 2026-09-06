@@ -146,6 +146,7 @@ export const PRODUCTS: Product[] = [
     name: "Vesper",
     categorySlug: "prescription",
     price: 160,
+    badge: "Sold Out",
     description:
       "Soft square acetate optical frame with a slightly rounded profile for an approachable, editorial finish.",
     images: [stockPhoto("1574258495973-f010dfbb5371")],

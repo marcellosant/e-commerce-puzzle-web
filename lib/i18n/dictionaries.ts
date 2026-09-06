@@ -5,7 +5,6 @@ export interface Dictionary {
     home: string;
     categories: string;
     favorites: string;
-    profile: string;
     cart: string;
   };
   home: {
@@ -108,10 +107,6 @@ export interface Dictionary {
     title: string;
     empty: string;
   };
-  profile: {
-    title: string;
-    comingSoon: string;
-  };
   badges: {
     New: string;
     Bestseller: string;
@@ -132,7 +127,6 @@ const en: Dictionary = {
     home: "Home",
     categories: "Categories",
     favorites: "Favorites",
-    profile: "Profile",
     cart: "Cart",
   },
   home: {
@@ -237,10 +231,6 @@ const en: Dictionary = {
     title: "Favorites",
     empty: "You haven't saved any frames yet.",
   },
-  profile: {
-    title: "Profile",
-    comingSoon: "Account management is coming soon.",
-  },
   badges: {
     New: "New",
     Bestseller: "Bestseller",
@@ -261,7 +251,6 @@ const pt: Dictionary = {
     home: "Início",
     categories: "Categorias",
     favorites: "Favoritos",
-    profile: "Perfil",
     cart: "Carrinho",
   },
   home: {
@@ -365,10 +354,6 @@ const pt: Dictionary = {
   favorites: {
     title: "Favoritos",
     empty: "Você ainda não salvou nenhuma armação.",
-  },
-  profile: {
-    title: "Perfil",
-    comingSoon: "Gerenciamento de conta em breve.",
   },
   badges: {
     New: "Novo",
