@@ -18,13 +18,22 @@ const sourceSerif4 = Source_Serif_4({
   variable: "--font-source-serif",
 });
 
-// Absolute base for OG/canonical URLs. Vercel injects VERCEL_URL per deployment;
-// NEXT_PUBLIC_SITE_URL overrides it once a custom domain exists.
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000");
+// Absolute base for OG/canonical URLs, most stable source first.
+// VERCEL_URL is deliberately last: it is the per-deployment hostname and
+// changes on every push, which would make canonicals point at throwaway
+// URLs. VERCEL_PROJECT_PRODUCTION_URL is the stable production domain.
+// Set NEXT_PUBLIC_SITE_URL once a custom domain exists.
+function resolveSiteUrl(): string {
+  const candidate =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ??
+    process.env.VERCEL_URL;
+
+  if (!candidate) return "http://localhost:3000";
+  return candidate.startsWith("http") ? candidate : `https://${candidate}`;
+}
+
+const siteUrl = resolveSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
