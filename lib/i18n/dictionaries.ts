@@ -117,6 +117,11 @@ export interface Dictionary {
     Bestseller: string;
     "Sold Out": string;
   };
+  notFound: {
+    title: string;
+    message: string;
+    cta: string;
+  };
   a11y: {
     skipToContent: string;
   };
@@ -241,6 +246,11 @@ const en: Dictionary = {
     Bestseller: "Bestseller",
     "Sold Out": "Sold Out",
   },
+  notFound: {
+    title: "Page Not Found",
+    message: "The page you're looking for doesn't exist or has moved.",
+    cta: "Back to Home",
+  },
   a11y: {
     skipToContent: "Skip to content",
   },
@@ -364,6 +374,11 @@ const pt: Dictionary = {
     New: "Novo",
     Bestseller: "Mais Vendido",
     "Sold Out": "Esgotado",
+  },
+  notFound: {
+    title: "Página Não Encontrada",
+    message: "A página que você procura não existe ou foi movida.",
+    cta: "Voltar ao Início",
   },
   a11y: {
     skipToContent: "Pular para o conteúdo",
