@@ -153,20 +153,26 @@ export function createMeridianFrame(): THREE.Group {
   bridge.position.set(0, LENS_HALF_H * 0.18, 0);
   group.add(bridge);
 
-  // Temples: thin arms running back from the outer tips toward the ears.
-  // Anchored outside the lens outline and high, near the cat-eye tip, so they
-  // don't read as bars lying across the lenses when seen through them.
+  // Temples: the arms running from the hinges back to the ears.
+  //
+  // Deliberately substantial rather than hairline. Face-on they barely show,
+  // but in profile the arm is most of what the eye reads as a real pair of
+  // glasses sitting on a head — a frame front alone looks pasted on. They are
+  // flat in section, like real acetate arms, and drop slightly toward the ear.
   for (const side of [-1, 1] as const) {
     const temple = new THREE.Mesh(
-      new THREE.BoxGeometry(0.0022, 0.0026, 0.095),
+      new THREE.BoxGeometry(0.0032, 0.0062, 0.115),
       gold
     );
     temple.position.set(
-      side * (eyeOffset + LENS_HALF_W * 1.04),
-      LENS_HALF_H * 1.02,
-      -0.05
+      side * (eyeOffset + LENS_HALF_W * 0.98),
+      LENS_HALF_H * 0.92,
+      -0.058
     );
-    temple.rotation.y = side * 0.1;
+    // Angled in toward the head, and tipped down so the far end sits where an
+    // ear would be rather than pointing straight back into space.
+    temple.rotation.y = side * 0.13;
+    temple.rotation.x = -0.09;
     group.add(temple);
   }
 

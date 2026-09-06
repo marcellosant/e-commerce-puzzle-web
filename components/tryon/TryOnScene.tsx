@@ -23,6 +23,21 @@ const POSITION_RESPONSIVENESS = 22;
 const SCALE_RESPONSIVENESS = 14;
 const ROTATION_RESPONSIVENESS = 18;
 
+/**
+ * The frame is rendered under perspective rather than orthographically.
+ *
+ * Orthographic projection has no foreshortening, so a turned head produced a
+ * frame that stayed the same width and read as a flat sticker pasted over the
+ * face. Perspective makes the far lens recede and the near temple grow, which
+ * is most of what sells it as an object sitting on a head.
+ *
+ * The camera sits a fixed distance from the plane the frame is placed on, so
+ * pixels convert to world units by one constant — placement stays driven by
+ * landmarks, with no need to match whatever intrinsics the detector assumed.
+ */
+const CAMERA_FOV_DEGREES = 45;
+const CAMERA_DISTANCE = 1;
+
 interface TryOnSceneProps {
   videoRef: RefObject<HTMLVideoElement | null>;
   landmarkerRef: RefObject<FaceLandmarker | null>;
@@ -44,10 +59,14 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
 
     const scene = new THREE.Scene();
 
-    // Orthographic and measured in CSS pixels, so a position derived from
-    // landmarks can be used directly without reconciling the render camera
-    // with whatever intrinsics the detector assumed.
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1000, 1000);
+    const camera = new THREE.PerspectiveCamera(CAMERA_FOV_DEGREES, 1, 0.01, 100);
+    camera.position.z = CAMERA_DISTANCE;
+
+    // World units spanned by one CSS pixel on the plane the frame sits on.
+    // Recomputed on resize; everything downstream works in pixels and converts
+    // through this, so the landmark-driven placement is unchanged by the move
+    // to perspective.
+    let worldPerPixel = 0;
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.6));
     const key = new THREE.DirectionalLight(0xffffff, 2.2);
@@ -76,11 +95,14 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
       displayWidth = clientWidth;
       displayHeight = clientHeight;
       renderer.setSize(clientWidth, clientHeight, false);
-      camera.left = -clientWidth / 2;
-      camera.right = clientWidth / 2;
-      camera.top = clientHeight / 2;
-      camera.bottom = -clientHeight / 2;
+      camera.aspect = clientWidth / clientHeight;
       camera.updateProjectionMatrix();
+
+      // Height of the view frustum where the frame sits, divided by the pixels
+      // covering it.
+      const visibleHeight =
+        2 * CAMERA_DISTANCE * Math.tan((CAMERA_FOV_DEGREES * Math.PI) / 360);
+      worldPerPixel = visibleHeight / clientHeight;
     }
 
     resize();
@@ -131,10 +153,10 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
 
             if (anchor) {
               // Display pixels are top-left origin with y down; the scene is
-              // centre origin with y up.
-              const targetX = anchor.center.x - displayWidth / 2;
-              const targetY = displayHeight / 2 - anchor.center.y;
-              const targetScale = anchor.widthPx / modelWidth;
+              // centre origin with y up, in world units.
+              const targetX = (anchor.center.x - displayWidth / 2) * worldPerPixel;
+              const targetY = (displayHeight / 2 - anchor.center.y) * worldPerPixel;
+              const targetScale = (anchor.widthPx * worldPerPixel) / modelWidth;
 
               if (!smoothed.initialised) {
                 smoothed.x = targetX;

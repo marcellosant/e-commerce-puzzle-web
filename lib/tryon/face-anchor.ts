@@ -31,7 +31,7 @@ export const LANDMARK = {
  * Eyewear reaches past the eyes to the temples, so this is always > 1; the
  * value is matched by eye against the product photo.
  */
-export const FRAME_WIDTH_RATIO = 1.42;
+export const FRAME_WIDTH_RATIO = 1.9;
 
 /**
  * The video is rendered with object-cover, so it is scaled up until it fills
