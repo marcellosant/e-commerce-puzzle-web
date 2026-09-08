@@ -71,6 +71,10 @@ types/          Shared TypeScript types
 Business logic lives in `lib/` as pure functions so it can be unit-tested without
 rendering components. `app/` and `components/` stay thin.
 
+[`docs/HANDOVER.md`](docs/HANDOVER.md) carries what this file does not: the
+reasoning behind the non-obvious decisions, the things that look like bugs and
+are not, and the ones that break quietly. Read it before changing the try-on.
+
 ## Virtual try-on
 
 Open a frame that supports it — Meridian — and the product page offers a try-on. On a
