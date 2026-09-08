@@ -9,10 +9,55 @@ import {
   rotationFromPoseMatrix,
   smoothAngleTowards,
   smoothTowards,
+  type Landmark,
 } from "@/lib/tryon/face-anchor";
+import { syntheticLandmarks, type HeadPose } from "@/lib/tryon/synthetic-face";
 
 /** The video is mirrored in CSS, so the overlay is mirrored to match. */
 const MIRRORED = true;
+
+/**
+ * Development-only hook for driving the frame from a synthetic head.
+ *
+ * The try-on can otherwise only be seen in front of a working camera, which
+ * this project's tooling has no access to. Setting a pose here renders the
+ * frame at that pose with no camera and no detector, which makes the geometry
+ * inspectable across the full range of head movement rather than only at
+ * whatever angles a person happens to hold while testing on a phone.
+ *
+ * Compiled out of production builds.
+ */
+const MOCK_ENABLED = process.env.NODE_ENV !== "production";
+
+declare global {
+  interface Window {
+    __puzzleTryOnPose?: HeadPose | null;
+  }
+}
+
+function readMockPose(): HeadPose | null {
+  if (!MOCK_ENABLED || typeof window === "undefined") return null;
+  return window.__puzzleTryOnPose ?? null;
+}
+
+/**
+ * The head rotation the mock stands in for, in the detector's matrix form.
+ *
+ * Reports the head's true rotation and nothing else, exactly as the detector
+ * does. Compensating for the renderer's mirroring here would be wrong twice
+ * over: the landmarks are mirrored too, so pre-flipping the rotation leaves
+ * the frame facing one way and the face it sits on facing the other.
+ */
+function mockPoseRotation(
+  pose: HeadPose,
+  euler: THREE.Euler,
+  quaternion: THREE.Quaternion,
+  scratch: THREE.Matrix4
+): number[] {
+  euler.set(pose.pitch ?? 0, pose.yaw ?? 0, pose.roll ?? 0, "YXZ");
+  quaternion.setFromEuler(euler);
+  return scratch.makeRotationFromQuaternion(quaternion).toArray();
+}
 
 /**
  * How quickly the frame chases the face, as a fraction of the gap closed per
@@ -144,6 +189,8 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
 
     const euler = new THREE.Euler();
     const templeWorld = new THREE.Vector3();
+    const mockEuler = new THREE.Euler();
+    const mockQuaternion = new THREE.Quaternion();
 
     /**
      * Hides whichever arm has swung behind the head.
@@ -181,6 +228,79 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
       for (const temple of temples) temple.visible = temple !== furthest;
     }
 
+    /**
+     * Places the frame from one detection.
+     *
+     * Split out from the loop so the same path can be driven by the synthetic
+     * head in development, which is the only way to check the geometry across
+     * the full range of head movement without a person in front of a camera.
+     */
+    function applyDetection(
+      landmarks: Landmark[],
+      videoSize: { width: number; height: number },
+      poseRotation: number[] | null,
+      delta: number
+    ) {
+      const anchor = computeFrameAnchor(
+        landmarks,
+        videoSize,
+        { width: displayWidth, height: displayHeight },
+        MIRRORED
+      );
+      if (!anchor) return;
+
+      // Display pixels are top-left origin with y down; the scene is centre
+      // origin with y up, in world units.
+      const targetX = (anchor.center.x - displayWidth / 2) * worldPerPixel;
+      const targetY = (displayHeight / 2 - anchor.center.y) * worldPerPixel;
+      const targetScale = (anchor.widthPx * worldPerPixel) / modelWidth;
+
+      if (!smoothed.initialised) {
+        smoothed.x = targetX;
+        smoothed.y = targetY;
+        smoothed.scale = targetScale;
+        smoothed.roll = -anchor.roll;
+        smoothed.initialised = true;
+        frame.visible = true;
+      } else {
+        smoothed.x = smoothTowards(smoothed.x, targetX, POSITION_RESPONSIVENESS, delta);
+        smoothed.y = smoothTowards(smoothed.y, targetY, POSITION_RESPONSIVENESS, delta);
+        smoothed.scale = smoothTowards(smoothed.scale, targetScale, SCALE_RESPONSIVENESS, delta);
+        smoothed.roll = smoothAngleTowards(smoothed.roll, -anchor.roll, ROTATION_RESPONSIVENESS, delta);
+      }
+
+      // Full head orientation when the detector provides it, so the frame
+      // turns with the head rather than staying face-on. Falls back to the
+      // in-plane tilt read straight from the eye line.
+      if (poseRotation) {
+        poseMatrix.fromArray(poseRotation);
+        targetQuaternion.setFromRotationMatrix(poseMatrix);
+        if (MIRRORED) {
+          // Reflecting the scene across X reverses the sense of any rotation
+          // about Y and Z.
+          targetQuaternion.set(
+            targetQuaternion.x,
+            -targetQuaternion.y,
+            -targetQuaternion.z,
+            targetQuaternion.w
+          );
+        }
+        frame.quaternion.slerp(
+          targetQuaternion,
+          1 - Math.exp(-ROTATION_RESPONSIVENESS * delta)
+        );
+      } else {
+        frame.rotation.set(0, 0, smoothed.roll);
+      }
+    }
+
+    function loseFace() {
+      // Hide rather than leave the frame stranded, and forget the smoothing so
+      // it doesn't slide in from a stale spot when a face returns.
+      frame.visible = false;
+      smoothed.initialised = false;
+    }
+
     let raf = 0;
     let lastVideoTime = -1;
     let lastFrameTime = performance.now();
@@ -192,94 +312,54 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
       const delta = Math.min((now - lastFrameTime) / 1000, 0.1);
       lastFrameTime = now;
 
-      const video = videoRef.current;
-      const landmarker = landmarkerRef.current;
+      const mock = readMockPose();
 
-      if (
-        video &&
-        landmarker &&
-        video.readyState >= 2 &&
-        video.videoWidth > 0 &&
-        displayWidth > 0
-      ) {
-        // Detection is keyed on the video clock: rendering can outpace the
-        // camera, and re-running the model on a frame already seen is pure cost.
-        if (video.currentTime !== lastVideoTime) {
-          lastVideoTime = video.currentTime;
-          const result = landmarker.detectForVideo(video, now);
-          const landmarks = result.faceLandmarks?.[0];
+      if (mock && displayWidth > 0) {
+        const videoSize = { width: displayWidth, height: displayHeight };
+        applyDetection(
+          syntheticLandmarks(mock, videoSize),
+          videoSize,
+          mockPoseRotation(mock, mockEuler, mockQuaternion, poseMatrix),
+          delta
+        );
+      } else {
+        const video = videoRef.current;
+        const landmarker = landmarkerRef.current;
 
-          if (landmarks) {
-            const anchor = computeFrameAnchor(
-              landmarks,
-              { width: video.videoWidth, height: video.videoHeight },
-              { width: displayWidth, height: displayHeight },
-              MIRRORED
-            );
+        if (
+          video &&
+          landmarker &&
+          video.readyState >= 2 &&
+          video.videoWidth > 0 &&
+          displayWidth > 0
+        ) {
+          // Detection is keyed on the video clock: rendering can outpace the
+          // camera, and re-running the model on a frame already seen is pure
+          // cost.
+          if (video.currentTime !== lastVideoTime) {
+            lastVideoTime = video.currentTime;
+            const result = landmarker.detectForVideo(video, now);
+            const landmarks = result.faceLandmarks?.[0];
 
-            if (anchor) {
-              // Display pixels are top-left origin with y down; the scene is
-              // centre origin with y up, in world units.
-              const targetX = (anchor.center.x - displayWidth / 2) * worldPerPixel;
-              const targetY = (displayHeight / 2 - anchor.center.y) * worldPerPixel;
-              const targetScale = (anchor.widthPx * worldPerPixel) / modelWidth;
-
-              if (!smoothed.initialised) {
-                smoothed.x = targetX;
-                smoothed.y = targetY;
-                smoothed.scale = targetScale;
-                smoothed.roll = -anchor.roll;
-                smoothed.initialised = true;
-                frame.visible = true;
-              } else {
-                smoothed.x = smoothTowards(smoothed.x, targetX, POSITION_RESPONSIVENESS, delta);
-                smoothed.y = smoothTowards(smoothed.y, targetY, POSITION_RESPONSIVENESS, delta);
-                smoothed.scale = smoothTowards(smoothed.scale, targetScale, SCALE_RESPONSIVENESS, delta);
-                smoothed.roll = smoothAngleTowards(smoothed.roll, -anchor.roll, ROTATION_RESPONSIVENESS, delta);
-              }
-
-              // Full head orientation when the detector provides it, so the
-              // frame turns with the head rather than staying face-on. Falls
-              // back to the in-plane tilt read straight from the eye line.
+            if (landmarks) {
               const pose = result.facialTransformationMatrixes?.[0]?.data;
-              const rotation = pose
-                ? rotationFromPoseMatrix(Array.from(pose))
-                : null;
-
-              if (rotation) {
-                poseMatrix.fromArray(rotation);
-                targetQuaternion.setFromRotationMatrix(poseMatrix);
-                if (MIRRORED) {
-                  // Reflecting the scene across X reverses the sense of any
-                  // rotation about Y and Z.
-                  targetQuaternion.set(
-                    targetQuaternion.x,
-                    -targetQuaternion.y,
-                    -targetQuaternion.z,
-                    targetQuaternion.w
-                  );
-                }
-                frame.quaternion.slerp(
-                  targetQuaternion,
-                  1 - Math.exp(-ROTATION_RESPONSIVENESS * delta)
-                );
-              } else {
-                frame.rotation.set(0, 0, smoothed.roll);
-              }
+              applyDetection(
+                landmarks,
+                { width: video.videoWidth, height: video.videoHeight },
+                pose ? rotationFromPoseMatrix(Array.from(pose)) : null,
+                delta
+              );
+            } else {
+              loseFace();
             }
-          } else {
-            // No face in shot: hide rather than leave the frame stranded, and
-            // forget the smoothing so it doesn't slide in from a stale spot.
-            frame.visible = false;
-            smoothed.initialised = false;
           }
         }
+      }
 
-        if (smoothed.initialised) {
-          frame.position.set(smoothed.x, smoothed.y, 0);
-          frame.scale.setScalar(smoothed.scale);
-          updateTempleVisibility();
-        }
+      if (smoothed.initialised) {
+        frame.position.set(smoothed.x, smoothed.y, 0);
+        frame.scale.setScalar(smoothed.scale);
+        updateTempleVisibility();
       }
 
       renderer.render(scene, camera);
