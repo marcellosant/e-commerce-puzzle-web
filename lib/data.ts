@@ -5,10 +5,20 @@ import type {
   Product,
 } from "@/types";
 
-// TEMPORARY: every product/category photo below is a stock Unsplash image
-// picked (and manually checked) to roughly match that product's shape/style
-// — none of this is real Puzzle product photography yet. Swap it all out
-// for real shots once they exist; each spot below is a stockPhoto(id) call.
+// TEMPORARY: every photo below is stock, not Puzzle product photography.
+//
+// They were chosen as a set rather than one at a time: product alone, no
+// people, plain light background, similar framing. An earlier pass picked each
+// photo for its subject and ignored how they sat together, which read as a
+// scrapbook rather than a catalogue — and let two shots through with a rival's
+// branding visible on the lens.
+//
+// Because none of these products exist, the attributes follow the photographs
+// rather than the other way round: shape, material and colours describe what is
+// actually pictured. That keeps the filters honest.
+//
+// Replacing these means swapping each stockPhoto(id) call; nothing else depends
+// on where the images come from.
 
 function stockPhoto(id: string): string {
   return `https://images.unsplash.com/photo-${id}?w=800&h=800&fit=crop&q=80`;
@@ -18,30 +28,38 @@ function stockPhotoPortrait(id: string): string {
   return `https://images.unsplash.com/photo-${id}?w=600&h=800&fit=crop&q=80`;
 }
 
+/**
+ * Home page hero, shown as a slideshow behind a fixed headline.
+ *
+ * These are the one place people are welcome, unlike the catalogue tiles where
+ * anything but the product alone broke the set. The landscape earns its place
+ * against "See the World in Focus" rather than merely filling space.
+ */
+export const HERO_SLIDES: readonly string[] = [
+  "https://images.unsplash.com/photo-1581459914275-9a180ec34733?w=1600&h=1000&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1601307426703-20d19577e455?w=1600&h=1000&fit=crop&q=80",
+];
+
 export const CATEGORIES: Category[] = [
   {
     slug: "sunglasses",
     name: "Sunglasses",
-    imageSeed: "puzzle-cat-sunglasses",
-    image: stockPhotoPortrait("1511499767150-a48a237f0083"),
+    image: stockPhotoPortrait("1508296695146-257a814070b4"),
   },
   {
     slug: "prescription",
     name: "Prescription",
-    imageSeed: "puzzle-cat-prescription",
-    image: stockPhotoPortrait("1574258495973-f010dfbb5371"),
+    image: stockPhotoPortrait("1749525694688-03217cfbc52e"),
   },
   {
     slug: "contact-lenses",
     name: "Contact Lenses",
-    imageSeed: "puzzle-cat-contacts",
-    image: stockPhotoPortrait("1494869042583-f6c911f04b4c"),
+    image: stockPhotoPortrait("1743590363059-ce890f6cc97b"),
   },
   {
     slug: "accessories",
     name: "Accessories",
-    imageSeed: "puzzle-cat-accessories",
-    image: stockPhotoPortrait("1761896877961-90b19228334f"),
+    image: stockPhotoPortrait("1752127907132-30f67c040633"),
   },
 ];
 
@@ -57,15 +75,15 @@ export const PRODUCTS: Product[] = [
       "A wide, sculpted acetate frame with a subtle cat-eye lift. Meridian is built for full coverage without sacrificing lightness.",
     images: [stockPhoto("1508296695146-257a814070b4")],
     variants: [
-      { id: "v1", name: "Jet Black", hex: "#0A0A0A" },
+      { id: "v1", name: "Blush", hex: "#E8C4B8" },
       { id: "v2", name: "Tortoise", hex: "#6B4A2E" },
     ],
     frameShape: "Cat-Eye",
     material: "Acetate",
     specs: {
       material: "Italian acetate",
-      lenses: "Polarized CR-39, UV400",
-      hardware: "Stainless steel hinges",
+      lenses: "Gradient CR-39, UV400",
+      hardware: "Gold-tone metal trim",
       origin: "Made in Italy",
     },
     featured: true,
@@ -79,16 +97,16 @@ export const PRODUCTS: Product[] = [
     price: 210,
     badge: "New",
     description:
-      "Classic aviator silhouette in brushed titanium, finished with mineral glass lenses for distortion-free clarity.",
-    images: [stockPhoto("1511499767150-a48a237f0083")],
+      "A slim round frame in polished metal, fitted with deep green mineral glass for distortion-free clarity.",
+    images: [stockPhoto("1511499602539-b3f6b9b79014")],
     variants: [
-      { id: "v1", name: "Gunmetal", hex: "#3A3B3C" },
-      { id: "v2", name: "Gold", hex: "#B8975A" },
+      { id: "v1", name: "Gold", hex: "#B8975A" },
+      { id: "v2", name: "Gunmetal", hex: "#3A3B3C" },
     ],
-    frameShape: "Aviator",
-    material: "Titanium",
+    frameShape: "Round",
+    material: "Metal",
     specs: {
-      material: "Brushed titanium",
+      material: "Polished steel",
       lenses: "Mineral glass, UV400",
       hardware: "Adjustable nose pads",
       origin: "Made in Japan",
@@ -102,18 +120,18 @@ export const PRODUCTS: Product[] = [
     categorySlug: "sunglasses",
     price: 260,
     description:
-      "An oversized round frame with a deep, matte finish — engineered for maximum light coverage in an editorial silhouette.",
-    images: [stockPhoto("1577803645773-f96470509666")],
+      "An oversized round frame in warm metal, with a gradient tint that fades from deep amber to clear.",
+    images: [stockPhoto("1649119161997-00ffc8c24e11")],
     variants: [
-      { id: "v1", name: "Matte Black", hex: "#111111" },
-      { id: "v2", name: "Olive", hex: "#5C5A44" },
+      { id: "v1", name: "Amber", hex: "#8A5A2B" },
+      { id: "v2", name: "Gold", hex: "#B8975A" },
     ],
     frameShape: "Round",
-    material: "Acetate",
+    material: "Metal",
     specs: {
-      material: "Bio-acetate",
-      lenses: "Polarized CR-39, UV400",
-      hardware: "Spring hinges",
+      material: "Stainless steel",
+      lenses: "Gradient CR-39, UV400",
+      hardware: "Acetate temple tips",
       origin: "Made in Italy",
     },
     featured: true,
@@ -125,16 +143,16 @@ export const PRODUCTS: Product[] = [
     categorySlug: "prescription",
     price: 180,
     description:
-      "A clean rectangular optical frame in lightweight titanium — a quiet, precise everyday shape.",
-    images: [stockPhoto("1591076482161-42ce6da69f67")],
+      "A browline optical frame with a bold acetate top rim and a fine metal underwire — a quiet, precise everyday shape.",
+    images: [stockPhoto("1772009288423-96090d2998c7")],
     variants: [
-      { id: "v1", name: "Silver", hex: "#C7C9CB" },
+      { id: "v1", name: "Oxblood", hex: "#7B3B3B" },
       { id: "v2", name: "Black", hex: "#151515" },
     ],
     frameShape: "Rectangle",
-    material: "Titanium",
+    material: "Acetate",
     specs: {
-      material: "Titanium",
+      material: "Acetate and steel",
       lenses: "Ready for prescription lenses",
       hardware: "Spring hinges",
       origin: "Made in Japan",
@@ -149,13 +167,13 @@ export const PRODUCTS: Product[] = [
     price: 160,
     badge: "Sold Out",
     description:
-      "Soft square acetate optical frame with a slightly rounded profile for an approachable, editorial finish.",
-    images: [stockPhoto("1574258495973-f010dfbb5371")],
+      "A soft cat-eye optical frame in black acetate, finished with a flecked shimmer along the upper rim.",
+    images: [stockPhoto("1649303922416-75f631e6ac8e")],
     variants: [
-      { id: "v1", name: "Amber", hex: "#8A5A2B" },
-      { id: "v2", name: "Black", hex: "#101010" },
+      { id: "v1", name: "Black", hex: "#101010" },
+      { id: "v2", name: "Tortoise", hex: "#6B4A2E" },
     ],
-    frameShape: "Square",
+    frameShape: "Cat-Eye",
     material: "Acetate",
     specs: {
       material: "Italian acetate",
@@ -172,18 +190,18 @@ export const PRODUCTS: Product[] = [
     price: 175,
     badge: "New",
     description:
-      "A refined round optical frame in polished metal, paired with keyhole bridge detailing.",
-    images: [stockPhoto("1591076482161-42ce6da69f67")],
+      "A geometric optical frame in slim metal, with faceted rims and marbled acetate temple tips.",
+    images: [stockPhoto("1749525694688-03217cfbc52e")],
     variants: [
-      { id: "v1", name: "Gold", hex: "#B7975A" },
-      { id: "v2", name: "Gunmetal", hex: "#414243" },
+      { id: "v1", name: "Black", hex: "#151515" },
+      { id: "v2", name: "Gold", hex: "#B7975A" },
     ],
-    frameShape: "Round",
+    frameShape: "Square",
     material: "Metal",
     specs: {
       material: "Stainless steel",
       lenses: "Ready for prescription lenses",
-      hardware: "Keyhole bridge",
+      hardware: "Marbled acetate tips",
       origin: "Made in Japan",
     },
   },
@@ -194,8 +212,8 @@ export const PRODUCTS: Product[] = [
     categorySlug: "contact-lenses",
     price: 120,
     description:
-      "Monthly disposable contact lenses with a breathable silicone-hydrogel base for all-day comfort.",
-    images: [stockPhoto("1494869042583-f6c911f04b4c")],
+      "Monthly disposable contact lenses with a breathable silicone-hydrogel base for all-day comfort. Supplied with a case.",
+    images: [stockPhoto("1743590363059-ce890f6cc97b")],
     variants: [{ id: "v1", name: "Clear", hex: "#E7E7E7" }],
     frameShape: "Round",
     material: "Acetate",
@@ -215,32 +233,13 @@ export const PRODUCTS: Product[] = [
     badge: "Bestseller",
     description:
       "Daily disposable lenses with a high water content for extended wear comfort — no case, no solution.",
-    images: [stockPhoto("1516220362602-dba5272034e7")],
+    images: [stockPhoto("1777380104555-1f47491729a6")],
     variants: [{ id: "v1", name: "Clear", hex: "#EDEDED" }],
     frameShape: "Round",
     material: "Acetate",
     specs: {
       material: "Hydrogel",
       lenses: "Daily disposable",
-      hardware: "N/A",
-      origin: "Made in Germany",
-    },
-  },
-  {
-    id: "p9",
-    slug: "night-shift",
-    name: "Night Shift",
-    categorySlug: "contact-lenses",
-    price: 140,
-    description:
-      "Extended-wear lenses with a blue-light filtering tint, designed for long screen-heavy days.",
-    images: [stockPhoto("1564278692313-b2d65996fc93")],
-    variants: [{ id: "v1", name: "Blue Tint", hex: "#D8E3EA" }],
-    frameShape: "Round",
-    material: "Acetate",
-    specs: {
-      material: "Silicone hydrogel",
-      lenses: "Blue-light filtering",
       hardware: "N/A",
       origin: "Made in Germany",
     },
@@ -253,7 +252,7 @@ export const PRODUCTS: Product[] = [
     price: 65,
     description:
       "A rigid, minimalist eyewear case in matte-finished vegan leather with a magnetic clasp.",
-    images: [stockPhoto("1632986636968-04958bfbbf3f")],
+    images: [stockPhoto("1752127907132-30f67c040633")],
     variants: [
       { id: "v1", name: "Black", hex: "#0D0D0D" },
       { id: "v2", name: "Sand", hex: "#D8CBB4" },
@@ -275,11 +274,11 @@ export const PRODUCTS: Product[] = [
     categorySlug: "accessories",
     price: 25,
     description:
-      "A microfiber lens cloth set in three tonal shades, finished with a woven Puzzle logo.",
-    images: [stockPhoto("1737091985926-f9acc594fcbb")],
+      "A microfiber lens cloth in a soft, oversized cut, finished with a woven Puzzle logo in the corner.",
+    images: [stockPhoto("1565940340677-c98b931ffebd")],
     variants: [
-      { id: "v1", name: "Stone", hex: "#C9C4BB" },
-      { id: "v2", name: "Black", hex: "#141414" },
+      { id: "v1", name: "White", hex: "#F4F4F2" },
+      { id: "v2", name: "Stone", hex: "#C9C4BB" },
     ],
     frameShape: "Square",
     material: "Acetate",
@@ -287,29 +286,6 @@ export const PRODUCTS: Product[] = [
       material: "Microfiber",
       lenses: "N/A",
       hardware: "N/A",
-      origin: "Made in Portugal",
-    },
-  },
-  {
-    id: "p12",
-    slug: "chain-link",
-    name: "Chain Link",
-    categorySlug: "accessories",
-    price: 45,
-    badge: "New",
-    description:
-      "A sculptural stainless-steel eyewear chain with a matte finish, built to hold frames securely.",
-    images: [stockPhoto("1761896877961-90b19228334f")],
-    variants: [
-      { id: "v1", name: "Silver", hex: "#C7C9CB" },
-      { id: "v2", name: "Gold", hex: "#B8975A" },
-    ],
-    frameShape: "Square",
-    material: "Metal",
-    specs: {
-      material: "Stainless steel",
-      lenses: "N/A",
-      hardware: "Lobster clasp",
       origin: "Made in Portugal",
     },
   },

@@ -15,7 +15,7 @@ describe("catalog label helpers", () => {
     expect(frameShapeLabel("Cat-Eye", "en")).toBe("Cat-Eye");
     expect(materialLabel("Titanium", "en")).toBe("Titanium");
     expect(badgeLabel("Sold Out", "en")).toBe("Sold Out");
-    expect(colorLabel("Jet Black", "en")).toBe("Jet Black");
+    expect(colorLabel("Oxblood", "en")).toBe("Oxblood");
   });
 
   it("translate to Portuguese for locale 'pt'", () => {
@@ -23,7 +23,7 @@ describe("catalog label helpers", () => {
     expect(frameShapeLabel("Cat-Eye", "pt")).toBe("Gatinho");
     expect(materialLabel("Titanium", "pt")).toBe("Titânio");
     expect(badgeLabel("Sold Out", "pt")).toBe("Esgotado");
-    expect(colorLabel("Jet Black", "pt")).toBe("Preto Ônix");
+    expect(colorLabel("Oxblood", "pt")).toBe("Vinho");
   });
 
   it("colorLabel falls back to the original name for an unmapped color", () => {

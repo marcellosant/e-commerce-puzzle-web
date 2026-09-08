@@ -10,6 +10,8 @@ export interface Dictionary {
   home: {
     heroTitle: string;
     heroCta: string;
+    heroCarousel: string;
+    heroSlide: (index: number) => string;
     shopByCategory: string;
     curatedFrames: string;
     viewAll: string;
@@ -149,6 +151,8 @@ const en: Dictionary = {
   home: {
     heroTitle: "See the World in Focus",
     heroCta: "Shop the Collection",
+    heroCarousel: "Featured imagery",
+    heroSlide: (index) => `Show image ${index}`,
     shopByCategory: "Shop by Category",
     curatedFrames: "Curated Frames",
     viewAll: "View All",
@@ -293,6 +297,8 @@ const pt: Dictionary = {
   home: {
     heroTitle: "Veja o Mundo em Foco",
     heroCta: "Ver a Coleção",
+    heroCarousel: "Imagens em destaque",
+    heroSlide: (index) => `Mostrar imagem ${index}`,
     shopByCategory: "Compre por Categoria",
     curatedFrames: "Armações em Destaque",
     viewAll: "Ver Tudo",

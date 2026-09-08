@@ -48,7 +48,7 @@ describe("filterProducts", () => {
   });
 
   it("combines category and query filters", () => {
-    const result = filterProducts(PRODUCTS, { ...NO_FILTERS, category: "accessories" }, "chain");
+    const result = filterProducts(PRODUCTS, { ...NO_FILTERS, category: "accessories" }, "cloth");
     expect(result).toHaveLength(1);
     expect(result[0].categorySlug).toBe("accessories");
   });

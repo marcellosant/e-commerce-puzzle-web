@@ -8,11 +8,10 @@ import { categoryName } from "@/lib/i18n/catalog";
 
 interface CategoryCardProps {
   slug: CategorySlug;
-  imageSeed: string;
-  image?: string;
+  image: string;
 }
 
-export function CategoryCard({ slug, imageSeed, image }: CategoryCardProps) {
+export function CategoryCard({ slug, image }: CategoryCardProps) {
   const { locale } = useLocale();
   const name = categoryName(slug, locale);
   return (
@@ -21,7 +20,7 @@ export function CategoryCard({ slug, imageSeed, image }: CategoryCardProps) {
       className="group relative block aspect-[3/4] bg-surface-muted border border-black overflow-hidden"
     >
       <Image
-        src={image ?? `https://picsum.photos/seed/${imageSeed}/600/800`}
+        src={image}
         alt={name}
         fill
         sizes="(min-width: 1024px) 25vw, 50vw"

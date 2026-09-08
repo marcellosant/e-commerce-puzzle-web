@@ -36,18 +36,16 @@ const BADGE_LABELS: Record<ProductBadge, Record<Locale, string>> = {
 };
 
 const COLOR_LABELS: Record<string, string> = {
-  "Jet Black": "Preto Ônix",
+  Blush: "Rosé",
   Tortoise: "Tartaruga",
-  Gunmetal: "Chumbo",
   Gold: "Dourado",
-  "Matte Black": "Preto Fosco",
-  Olive: "Verde-Oliva",
-  Silver: "Prata",
-  Black: "Preto",
+  Gunmetal: "Chumbo",
   Amber: "Âmbar",
+  Oxblood: "Vinho",
+  Black: "Preto",
   Clear: "Transparente",
-  "Blue Tint": "Tom Azulado",
   Sand: "Areia",
+  White: "Branco",
   Stone: "Pedra",
 };
 
@@ -84,16 +82,16 @@ const PRODUCT_CONTENT_PT: Record<string, ProductContentPt> = {
       "Uma armação de acetato ampla e esculpida, com uma leve elevação em formato gatinho. A Meridian foi feita para cobertura total sem abrir mão da leveza.",
     specs: {
       material: "Acetato italiano",
-      lenses: "CR-39 polarizada, UV400",
-      hardware: "Dobradiças em aço inoxidável",
+      lenses: "CR-39 degradê, UV400",
+      hardware: "Detalhe metálico dourado",
       origin: "Feito na Itália",
     },
   },
   p2: {
     description:
-      "Silhueta clássica de aviador em titânio escovado, com lentes de vidro mineral para uma nitidez sem distorção.",
+      "Armação redonda e fina em metal polido, com vidro mineral verde-escuro para uma nitidez sem distorção.",
     specs: {
-      material: "Titânio escovado",
+      material: "Aço polido",
       lenses: "Vidro mineral, UV400",
       hardware: "Plaquetas nasais ajustáveis",
       origin: "Feito no Japão",
@@ -101,19 +99,19 @@ const PRODUCT_CONTENT_PT: Record<string, ProductContentPt> = {
   },
   p3: {
     description:
-      "Uma armação redonda super dimensionada com acabamento fosco profundo — projetada para cobertura máxima de luz em uma silhueta editorial.",
+      "Uma armação redonda super dimensionada em metal quente, com lente degradê que vai do âmbar profundo ao transparente.",
     specs: {
-      material: "Bioacetato",
-      lenses: "CR-39 polarizada, UV400",
-      hardware: "Dobradiças com mola",
+      material: "Aço inoxidável",
+      lenses: "CR-39 degradê, UV400",
+      hardware: "Ponteiras em acetato",
       origin: "Feito na Itália",
     },
   },
   p4: {
     description:
-      "Uma armação óptica retangular e discreta em titânio leve — um formato silencioso e preciso para o dia a dia.",
+      "Armação óptica browline com aro superior marcante em acetato e fio metálico fino embaixo — um formato discreto e preciso para o dia a dia.",
     specs: {
-      material: "Titânio",
+      material: "Acetato e aço",
       lenses: "Pronta para lentes de grau",
       hardware: "Dobradiças com mola",
       origin: "Feito no Japão",
@@ -121,7 +119,7 @@ const PRODUCT_CONTENT_PT: Record<string, ProductContentPt> = {
   },
   p5: {
     description:
-      "Armação óptica quadrada e suave em acetato, com perfil levemente arredondado para um acabamento editorial e acolhedor.",
+      "Armação óptica gatinho suave em acetato preto, com acabamento matizado e brilho sutil na parte superior do aro.",
     specs: {
       material: "Acetato italiano",
       lenses: "Pronta para lentes de grau",
@@ -131,17 +129,17 @@ const PRODUCT_CONTENT_PT: Record<string, ProductContentPt> = {
   },
   p6: {
     description:
-      "Uma armação óptica redonda e refinada em metal polido, com detalhe de ponte em buraco de fechadura.",
+      "Armação óptica geométrica em metal fino, com aros facetados e ponteiras em acetato marmorizado.",
     specs: {
       material: "Aço inoxidável",
       lenses: "Pronta para lentes de grau",
-      hardware: "Ponte estilo buraco de fechadura",
+      hardware: "Ponteiras em acetato marmorizado",
       origin: "Feito no Japão",
     },
   },
   p7: {
     description:
-      "Lentes de contato descartáveis mensais com base de hidrogel de silicone respirável para conforto o dia todo.",
+      "Lentes de contato descartáveis mensais com base de hidrogel de silicone respirável para conforto o dia todo. Acompanha estojo.",
     specs: {
       material: "Hidrogel de silicone",
       lenses: "Descarte mensal",
@@ -159,16 +157,6 @@ const PRODUCT_CONTENT_PT: Record<string, ProductContentPt> = {
       origin: "Fabricado na Alemanha",
     },
   },
-  p9: {
-    description:
-      "Lentes de uso prolongado com filtro para luz azul, feitas para dias longos na frente da tela.",
-    specs: {
-      material: "Hidrogel de silicone",
-      lenses: "Filtro de luz azul",
-      hardware: "N/A",
-      origin: "Fabricado na Alemanha",
-    },
-  },
   p10: {
     description:
       "Um estojo minimalista e rígido em couro vegano com acabamento fosco e fecho magnético.",
@@ -181,21 +169,11 @@ const PRODUCT_CONTENT_PT: Record<string, ProductContentPt> = {
   },
   p11: {
     description:
-      "Um kit de flanelas de microfibra em três tons, finalizado com o logo da Puzzle tecido.",
+      "Uma flanela de microfibra em corte amplo e macio, com o logo da Puzzle tecido no canto.",
     specs: {
       material: "Microfibra",
       lenses: "N/A",
       hardware: "N/A",
-      origin: "Feito em Portugal",
-    },
-  },
-  p12: {
-    description:
-      "Uma corrente escultural em aço inoxidável com acabamento fosco, feita para segurar a armação com segurança.",
-    specs: {
-      material: "Aço inoxidável",
-      lenses: "N/A",
-      hardware: "Fecho tipo lagosta",
       origin: "Feito em Portugal",
     },
   },

@@ -7,9 +7,7 @@ export type CategorySlug =
 export interface Category {
   slug: CategorySlug;
   name: string;
-  imageSeed: string;
-  /** Optional real photo URL; falls back to a Picsum placeholder from imageSeed when unset. */
-  image?: string;
+  image: string;
 }
 
 export interface ColorVariant {
