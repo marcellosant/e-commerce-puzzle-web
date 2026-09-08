@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
+  # Runs on anything opened against main, whatever branch it comes from, so a
+  # release candidate is checked once more before it lands.
   pull_request:
     branches: [main]
 
