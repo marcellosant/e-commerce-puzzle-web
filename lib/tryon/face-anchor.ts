@@ -36,11 +36,11 @@ export const LANDMARK = {
 } as const;
 
 /**
- * How much wider the frame is than the span between the outer eye corners.
- * Eyewear reaches past the eyes to the temples, so this is always > 1; the
- * value is matched by eye against the product photo.
+ * How much wider the frame's rims are than the span between the outer eye
+ * corners. Eyewear reaches past the eyes toward the temples, so this is always
+ * greater than one; the value is settled by looking at a face wearing it.
  */
-export const FRAME_WIDTH_RATIO = 1.79;
+export const FRAME_WIDTH_RATIO = 1.68;
 
 /**
  * The video is rendered with object-cover, so it is scaled up until it fills

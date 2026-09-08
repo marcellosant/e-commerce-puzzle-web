@@ -124,6 +124,8 @@ export function createMeridianFrame(): THREE.Group {
   });
 
   const eyeOffset = LENS_HALF_W + BRIDGE_HALF_W;
+  const eyes = new THREE.Group();
+  group.add(eyes);
 
   for (const side of [-1, 1] as const) {
     const eye = new THREE.Group();
@@ -145,8 +147,19 @@ export function createMeridianFrame(): THREE.Group {
     lens.scale.setScalar(0.88);
     eye.add(lens);
 
-    group.add(eye);
+    eyes.add(eye);
   }
+
+  // How wide the frame reads as, measured across the rims alone.
+  //
+  // The renderer sizes the frame against this rather than against the whole
+  // model's bounding box. The box also spans the arms, so it moved every time
+  // they were adjusted, silently resizing the frame on the wearer's face and
+  // needing the fit recalibrated each time. The rims are what a wearer sees
+  // and judges the fit by, so they are what it is scaled to.
+  group.userData.frontWidth = new THREE.Box3()
+    .setFromObject(eyes)
+    .getSize(new THREE.Vector3()).x;
 
   // Bridge: a slim bar joining the two rims, sitting high like in the photo.
   const bridge = new THREE.Mesh(
@@ -156,31 +169,25 @@ export function createMeridianFrame(): THREE.Group {
   bridge.position.set(0, LENS_HALF_H * 0.18, 0);
   group.add(bridge);
 
-  // Temples: the arms running back from the hinges.
+  // Temples: the arms running back from the hinges toward the ears.
   //
-  // Cut to a stub rather than the ~115mm of a real arm. On a real face most of
-  // that length is hidden by the head, but nothing here occludes, so a
-  // full-length arm rendered as a long bar floating across hair and ears — and
-  // any error in head pitch was amplified along its length, throwing the far
-  // end far above the brow or below the jaw. A stub reads as a hinge
-  // disappearing behind the temple, which is what the eye expects, and it is
-  // short enough that pitch error stays invisible. Restoring the full length
-  // is part of building a proper occluder, not separate from it.
+  // Full length, which is only viable because the renderer now puts a
+  // depth-writing head behind the frame: most of an arm's length is inside the
+  // head's silhouette, and it is the occluder that cuts it off there. Without
+  // one these had to be stubs, or they drew as long bars across hair and ears.
   for (const side of [-1, 1] as const) {
     const temple = new THREE.Mesh(
-      new THREE.BoxGeometry(0.0032, 0.0062, 0.052),
+      new THREE.BoxGeometry(0.0032, 0.0062, 0.112),
       gold
     );
     temple.position.set(
       side * (eyeOffset + LENS_HALF_W * 0.98),
       LENS_HALF_H * 0.42,
-      -0.026
+      -0.056
     );
     // Angled in toward the head and dropping toward the ear.
     temple.rotation.y = side * 0.13;
     temple.rotation.x = -0.16;
-    // Tagged so the renderer can hide whichever arm has gone behind the head.
-    temple.userData.side = side;
     group.add(temple);
   }
 

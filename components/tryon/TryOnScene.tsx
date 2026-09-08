@@ -84,26 +84,29 @@ const CAMERA_FOV_DEGREES = 45;
 const CAMERA_DISTANCE = 1;
 
 /**
- * Head turn, in radians, past which the arm on the far side is hidden.
- *
- * Nothing here occludes: there is no depth-writing head for the frame to go
- * behind, so on a turn the far temple drew straight across the cheek and
- * forehead. Hiding it approximates what the head would have covered anyway,
- * and removes the single most obviously wrong thing in a profile view. A real
- * occluder mesh built from the face landmarks would replace this and would
- * also fix the far lens.
- */
-const FAR_TEMPLE_HIDE_YAW = 0.32;
+ * A stand-in head, in metres, that writes depth without drawing anything.
 
 /**
- * Head tilt, in radians, past which both arms are hidden.
+ * A stand-in head, in metres, that writes depth without drawing anything.
  *
- * Looking well up or down puts the arms behind the cheekbones and jaw on a
- * real face. With nothing to occlude them they instead swung out past the jaw
- * or up over the brow, which is the most obviously wrong thing in those views.
- * Same approximation as the yaw rule, and it goes away with a real occluder.
+ * Whatever falls behind it is discarded by the depth test, which is what stops
+ * the far lens and the far arm being painted over the cheek on a turn. It is a
+ * plain ellipsoid rather than a mesh built from the landmarks: the face's exact
+ * surface barely matters here, only that something roughly head-shaped and
+ * head-sized sits in the right place.
+ *
+ * Carried as a child of the frame so it inherits position, rotation and scale
+ * for free — the frame is already fitted to the face, so the head fitted to the
+ * frame is fitted to the face too.
+ *
+ * The depth is deliberately short of a real skull's so the front surface sits
+ * just behind the lenses. Erring the other way would swallow the frame itself.
  */
-const TEMPLE_HIDE_PITCH = 0.42;
+const HEAD_RADII: readonly [number, number, number] = [0.075, 0.105, 0.085];
+const HEAD_CENTRE: readonly [number, number, number] = [0, -0.03, -0.09];
+
+/** Draw the occluder instead of hiding it, to check its placement. */
+const SHOW_OCCLUDER = false;
 
 interface TryOnSceneProps {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -147,16 +150,27 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
     frame.visible = false;
     scene.add(frame);
 
-    const temples: THREE.Object3D[] = [];
-    frame.traverse((object) => {
-      if (object.userData.side !== undefined) temples.push(object);
-    });
+    // The model is built in metres; placement is in pixels. The frame reports
+    // the width of its rims, which is what a wearer judges the fit by — a
+    // bounding box would also span the arms and the occluding head, neither of
+    // which should have any bearing on how wide the frame is drawn.
+    const modelWidth = frame.userData.frontWidth as number;
 
-    // The model is built in metres; placement is in pixels. Measuring the mesh
-    // once gives the conversion, and keeps it correct if the geometry changes.
-    const modelWidth = new THREE.Box3().setFromObject(frame).getSize(
-      new THREE.Vector3()
-    ).x;
+    const occluder = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 24, 16),
+      new THREE.MeshBasicMaterial({
+        // Writes depth, paints nothing: the camera feed shows through where the
+        // head is, while the frame behind it is culled.
+        colorWrite: SHOW_OCCLUDER,
+        color: 0x224466,
+        wireframe: SHOW_OCCLUDER,
+      })
+    );
+    occluder.scale.set(...HEAD_RADII);
+    occluder.position.set(...HEAD_CENTRE);
+    // Ahead of the frame so its depth is already laid down when the frame draws.
+    occluder.renderOrder = -1;
+    frame.add(occluder);
 
     let displayWidth = 0;
     let displayHeight = 0;
@@ -187,46 +201,8 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
     const targetQuaternion = new THREE.Quaternion();
     const poseMatrix = new THREE.Matrix4();
 
-    const euler = new THREE.Euler();
-    const templeWorld = new THREE.Vector3();
     const mockEuler = new THREE.Euler();
     const mockQuaternion = new THREE.Quaternion();
-
-    /**
-     * Hides whichever arm has swung behind the head.
-     *
-     * Which side that is depends on the turn direction and on the mirroring,
-     * so rather than reason about signs it just compares the arms' depths and
-     * hides the one further from the camera. That stays correct whatever the
-     * conventions turn out to be.
-     */
-    function updateTempleVisibility() {
-      // YXZ puts yaw first, so .y reads as head turn and .x as tilt.
-      euler.setFromQuaternion(frame.quaternion, "YXZ");
-
-      if (Math.abs(euler.x) > TEMPLE_HIDE_PITCH) {
-        for (const temple of temples) temple.visible = false;
-        return;
-      }
-
-      const turned = Math.abs(euler.y) > FAR_TEMPLE_HIDE_YAW;
-      if (!turned) {
-        for (const temple of temples) temple.visible = true;
-        return;
-      }
-
-      frame.updateMatrixWorld(true);
-      let furthest: THREE.Object3D | null = null;
-      let furthestZ = Infinity;
-      for (const temple of temples) {
-        temple.getWorldPosition(templeWorld);
-        if (templeWorld.z < furthestZ) {
-          furthestZ = templeWorld.z;
-          furthest = temple;
-        }
-      }
-      for (const temple of temples) temple.visible = temple !== furthest;
-    }
 
     /**
      * Places the frame from one detection.
@@ -359,7 +335,6 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
       if (smoothed.initialised) {
         frame.position.set(smoothed.x, smoothed.y, 0);
         frame.scale.setScalar(smoothed.scale);
-        updateTempleVisibility();
       }
 
       renderer.render(scene, camera);
