@@ -12,7 +12,12 @@ export default function Home() {
   const { t } = useLocale();
 
   return (
-    <div>
+    // Every image on the home page is desaturated, so the landing reads as one
+    // monochrome statement and colour arrives only once you start choosing a
+    // frame. Applied here rather than inside the cards because it is a decision
+    // about this page: the same cards stay in colour in the collection, where
+    // colour is something you shop by.
+    <div className="[&_img]:grayscale">
       <HeroCarousel />
 
       <Section title={t.home.shopByCategory}>
