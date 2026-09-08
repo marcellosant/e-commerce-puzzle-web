@@ -110,14 +110,17 @@ export function createMeridianFrame(): THREE.Group {
     metalness: 0.85,
   });
 
+  // Tinted enough to read as a real sunglass lens and to stop the far arm
+  // showing through it, which it did while these were closer to clear glass.
+  // Still open enough that the wearer's eyes come through.
   const lensMaterial = new THREE.MeshPhysicalMaterial({
     color: LENS,
     roughness: 0.12,
     metalness: 0,
-    transmission: 0.6,
+    transmission: 0.25,
     thickness: 0.4,
     transparent: true,
-    opacity: 0.72,
+    opacity: 0.9,
   });
 
   const eyeOffset = LENS_HALF_W + BRIDGE_HALF_W;
@@ -153,27 +156,29 @@ export function createMeridianFrame(): THREE.Group {
   bridge.position.set(0, LENS_HALF_H * 0.18, 0);
   group.add(bridge);
 
-  // Temples: the arms running from the hinges back to the ears.
+  // Temples: the arms running back from the hinges.
   //
-  // Deliberately substantial rather than hairline. Face-on they barely show,
-  // but in profile the arm is most of what the eye reads as a real pair of
-  // glasses sitting on a head — a frame front alone looks pasted on. They are
-  // flat in section, like real acetate arms, and drop slightly toward the ear.
+  // Cut to a stub rather than the ~115mm of a real arm. On a real face most of
+  // that length is hidden by the head, but nothing here occludes, so a
+  // full-length arm rendered as a long bar floating across hair and ears — and
+  // any error in head pitch was amplified along its length, throwing the far
+  // end far above the brow or below the jaw. A stub reads as a hinge
+  // disappearing behind the temple, which is what the eye expects, and it is
+  // short enough that pitch error stays invisible. Restoring the full length
+  // is part of building a proper occluder, not separate from it.
   for (const side of [-1, 1] as const) {
     const temple = new THREE.Mesh(
-      new THREE.BoxGeometry(0.0032, 0.0062, 0.115),
+      new THREE.BoxGeometry(0.0032, 0.0062, 0.052),
       gold
     );
     temple.position.set(
       side * (eyeOffset + LENS_HALF_W * 0.98),
       LENS_HALF_H * 0.42,
-      -0.058
+      -0.026
     );
-    // Angled in toward the head, and dropped enough that the far end lands at
-    // ear height. Hinging near the top of a cat-eye and running level sent the
-    // arm out over the eyebrow instead, well above where an ear sits.
+    // Angled in toward the head and dropping toward the ear.
     temple.rotation.y = side * 0.13;
-    temple.rotation.x = -0.2;
+    temple.rotation.x = -0.16;
     // Tagged so the renderer can hide whichever arm has gone behind the head.
     temple.userData.side = side;
     group.add(temple);

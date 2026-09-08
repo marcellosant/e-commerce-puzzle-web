@@ -50,6 +50,16 @@ const CAMERA_DISTANCE = 1;
  */
 const FAR_TEMPLE_HIDE_YAW = 0.32;
 
+/**
+ * Head tilt, in radians, past which both arms are hidden.
+ *
+ * Looking well up or down puts the arms behind the cheekbones and jaw on a
+ * real face. With nothing to occlude them they instead swung out past the jaw
+ * or up over the brow, which is the most obviously wrong thing in those views.
+ * Same approximation as the yaw rule, and it goes away with a real occluder.
+ */
+const TEMPLE_HIDE_PITCH = 0.42;
+
 interface TryOnSceneProps {
   videoRef: RefObject<HTMLVideoElement | null>;
   landmarkerRef: RefObject<FaceLandmarker | null>;
@@ -144,10 +154,15 @@ export function TryOnScene({ videoRef, landmarkerRef }: TryOnSceneProps) {
      * conventions turn out to be.
      */
     function updateTempleVisibility() {
-      // YXZ puts yaw first, so .y reads as head turn independent of tilt.
+      // YXZ puts yaw first, so .y reads as head turn and .x as tilt.
       euler.setFromQuaternion(frame.quaternion, "YXZ");
-      const turned = Math.abs(euler.y) > FAR_TEMPLE_HIDE_YAW;
 
+      if (Math.abs(euler.x) > TEMPLE_HIDE_PITCH) {
+        for (const temple of temples) temple.visible = false;
+        return;
+      }
+
+      const turned = Math.abs(euler.y) > FAR_TEMPLE_HIDE_YAW;
       if (!turned) {
         for (const temple of temples) temple.visible = true;
         return;
